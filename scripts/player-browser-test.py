@@ -22,23 +22,24 @@ with sync_playwright() as p:
     page.get_by_role('button',name='시작 화면').click()
     page.get_by_role('button',name='제한 없음',exact=True).click()
     page.get_by_role('button',name='선수 맞히기 시작').click()
-    def state(): return page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v1'))")
+    def state(): return page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v2'))")
     def pick(correct=True):
         g=state();r=g['rounds'][g['index']]
         chosen=r['playerId'] if correct else next(i for i in r['choices'] if i!=r['playerId'])
         index=r['choices'].index(chosen)
         page.locator('.choices button').nth(index).click()
-    expect(page.locator('.photo-tag')).to_have_text('눈만 공개')
+    expect(page.locator('.photo-tag')).to_have_text('얼굴 1/64칸 공개')
+    expect(page.locator('.face-cell.opened')).to_have_count(1)
     assert page.locator('.face-window img').evaluate('(i)=>i.complete&&i.naturalWidth>0')
-    for i in range(7):
+    for i in range(66):
         page.get_by_role('button',name='추가 힌트').click()
         assert len(state()['rounds'][0]['hints'])==i+1
-    expect(page.locator('.photo-tag')).to_have_text('사진 전체 공개')
+    expect(page.locator('.photo-tag')).to_have_text('얼굴 64/64칸 공개')
     expect(page.get_by_role('button',name='모든 힌트를 공개했어요')).to_be_disabled()
     expect(page.locator('.revealed-hints span')).to_have_count(3)
-    assert state()['rounds'][0]['photoStage']==4
+    assert state()['rounds'][0]['photoStage']==63
     page.reload()
-    expect(page.locator('.photo-tag')).to_have_text('사진 전체 공개')
+    expect(page.locator('.photo-tag')).to_have_text('얼굴 64/64칸 공개')
     expect(page.locator('.revealed-hints span')).to_have_count(3)
     pick()
     expect(page.locator('.football-answer')).to_contain_text('+10점')
@@ -80,7 +81,7 @@ with sync_playwright() as p:
     page.reload()
     expect(page.get_by_role('timer')).to_have_text(frozen)
     page.get_by_label('타이머 재개').click()
-    page.evaluate("()=>{const g=JSON.parse(localStorage.getItem('bluewings-player-game-v1'));g.deadline=Date.now()-1000;localStorage.setItem('bluewings-player-game-v1',JSON.stringify(g))}")
+    page.evaluate("()=>{const g=JSON.parse(localStorage.getItem('bluewings-player-game-v2'));g.deadline=Date.now()-1000;localStorage.setItem('bluewings-player-game-v2',JSON.stringify(g))}")
     page.reload()
     expect(page.locator('.football-answer')).to_contain_text('시간 종료')
     assert state()['rounds'][0]['earned']==0
@@ -96,4 +97,4 @@ with sync_playwright() as p:
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     assert not errors,errors
     browser.close()
-    print('PASS: all 40 photos, roster/search/filter, 7 nonduplicate hints, 10/100/0 scoring, refresh, 40 rounds/4000 points, timer, fallback, mobile/desktop, no JS errors')
+    print('PASS: all 40 photos, roster/search/filter, 66 nonduplicate hints, 10/100/0 scoring, refresh, 40 rounds/4000 points, timer, fallback, mobile/desktop, no JS errors')
