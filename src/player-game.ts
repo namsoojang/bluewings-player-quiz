@@ -5,7 +5,7 @@ export const positionNames: Record<string,string> = {GK:'골키퍼',DF:'수비�
 export type Hint = 'photo' | 'age' | 'height' | 'position';
 export const FACE_GRID = 8;
 export const FACE_TILES = FACE_GRID * FACE_GRID;
-export function tileOrder(){const all=Array.from({length:FACE_TILES},(_,i)=>i);const facial=all.filter(i=>Math.floor(i/FACE_GRID)>=3&&Math.floor(i/FACE_GRID)<=5&&i%FACE_GRID>=1&&i%FACE_GRID<=6);const first=shuffle(facial)[0];return [first,...shuffle(all.filter(i=>i!==first))];}
+export function tileOrder(){const all=Array.from({length:FACE_TILES},(_,i)=>i);const facial=all.filter(i=>Math.floor(i/FACE_GRID)>=3&&Math.floor(i/FACE_GRID)<=5&&i%FACE_GRID>=1&&i%FACE_GRID<=6);return [...shuffle(facial),...shuffle(all.filter(i=>!facial.includes(i)))];}
 export type Round = { playerId: string; choices: string[]; photoStage: number; tileOrder:number[]; hints: Hint[]; selected: string | null; complete: boolean; earned: number; timedOut: boolean };
 export type Game = { rounds: Round[]; index: number; duration: number; remaining: number; deadline: number | null; finished: boolean; date: string };
 export function shuffle<T>(items:T[]):T[]{const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
