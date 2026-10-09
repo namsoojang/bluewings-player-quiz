@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.local
+.npm-cache/
+tsconfig.tsbuildinfo
+test-results/
+dev-server*.log
+.tools/
+archive/

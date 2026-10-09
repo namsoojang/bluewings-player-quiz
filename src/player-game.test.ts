@@ -1,0 +1,11 @@
+import { describe,expect,it } from 'vitest';
+import { players,newGame,addHint,availableHints,availableScore,submit,age,remainingTime,validGame } from './player-game';
+describe('선수 맞히기',()=>{
+ it('공식 40명과 고유 선수 ID, 사진과 얼굴 좌표가 있다',()=>{expect(players).toHaveLength(40);expect(new Set(players.map(p=>p.id)).size).toBe(40);for(const p of players){expect(p.face.eyeTop).toBeLessThan(p.face.eyeBottom);expect(p.face.eyeBottom).toBeLessThan(p.face.noseBottom);expect(p.face.noseBottom).toBeLessThan(p.face.mouthBottom);expect(p.image).toMatch(/^\/images\/players\//);}});
+ it('모든 선수와 4개의 고유 보기를 중복 없이 출제한다',()=>{const g=newGame(40,60);expect(new Set(g.rounds.map(r=>r.playerId)).size).toBe(40);for(const r of g.rounds){expect(new Set(r.choices).size).toBe(4);expect(r.choices).toContain(r.playerId);}expect(validGame(g)).toBe(true);});
+ it('사진은 순서대로 4단계 확장되고 정보 힌트는 한 번만 나온다',()=>{let r=newGame(10,0).rounds[0];for(let i=0;i<4;i++)r=addHint(r,0);expect(r.photoStage).toBe(4);expect(availableScore(r)).toBe(40);for(let i=0;i<3;i++)r=addHint(r,0);expect(new Set(r.hints.filter(h=>h!=='photo')).size).toBe(3);expect(availableHints(r)).toHaveLength(0);expect(addHint(r)).toBe(r);expect(availableScore(r)).toBe(10);});
+ it('랜덤 선택으로 사진 또는 정보 힌트를 보여 준다',()=>{const r=newGame(10,0).rounds[0];expect(addHint(r,0).hints).toEqual(['photo']);expect(addHint(r,.3).hints).toEqual(['age']);expect(addHint(r,.6).hints).toEqual(['height']);expect(addHint(r,.9).hints).toEqual(['position']);});
+ it('정답 배점과 오답 0점, 중복 제출 및 종료 후 힌트를 차단한다',()=>{const r=newGame(10,0).rounds[0];expect(submit(r,r.playerId).earned).toBe(100);const hinted=addHint(r,0);const done=submit(hinted,r.playerId);expect(done.earned).toBe(85);expect(submit(done,r.choices.find(id=>id!==r.playerId)!)).toBe(done);expect(addHint(done)).toBe(done);expect(submit(r,r.choices.find(id=>id!==r.playerId)!).earned).toBe(0);expect(submit(r,'unknown')).toBe(r);});
+ it('만 나이를 생일 전후로 계산한다',()=>{expect(age('2000-10-10','2026-10-09')).toBe(25);expect(age('2000-10-09','2026-10-09')).toBe(26);});
+ it('타이머 복구와 손상된 상태 검증',()=>{const g=newGame(10,60);expect(remainingTime({...g,deadline:10000},6500)).toBe(4);expect(remainingTime({...g,deadline:10000},11000)).toBe(0);expect(validGame({...g,index:99})).toBe(false);expect(validGame({...g,rounds:[g.rounds[0],g.rounds[0]]})).toBe(false);expect(validGame(null)).toBe(false);});
+});
