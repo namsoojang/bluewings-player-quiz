@@ -21,7 +21,7 @@ with sync_playwright() as p:
     expect(page.locator('.roster-grid')).to_contain_text('김주찬')
     page.get_by_role('button',name='시작 화면').click()
     page.get_by_role('button',name='선수 맞히기 시작').click()
-    def state(): return page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v3'))")
+    def state(): return page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v4'))")
     def pick(correct=True):
         g=state();r=g['rounds'][g['index']]
         chosen=r['playerId'] if correct else next(i for i in r['choices'] if i!=r['playerId'])
@@ -45,14 +45,16 @@ with sync_playwright() as p:
     for button in page.locator('.choices button').all(): expect(button).to_be_disabled()
     page.get_by_role('button',name='다음 선수',exact=True).click()
     pick(False)
-    expect(page.locator('.football-answer')).to_contain_text('오답')
-    assert state()['rounds'][1]['earned']==0
+    expect(page.locator('.wrong-feedback')).to_contain_text('오답')
+    assert not state()['rounds'][1]['complete']
+    pick(True)
+    assert state()['rounds'][1]['earned']==85
     page.get_by_role('button',name='다음 선수',exact=True).click()
     pick()
     expect(page.locator('.football-answer')).to_contain_text('+100점')
     page.once('dialog',lambda d:d.accept())
     page.get_by_role('button',name='게임 종료').click()
-    expect(page.locator('.football-results h1')).to_have_text('110점')
+    expect(page.locator('.football-results h1')).to_have_text('195점')
     expect(page.locator('.football-results')).to_contain_text('미응답 7문제')
     page.get_by_role('button',name='시작 화면으로').click()
     page.get_by_role('button',name='전체 40명',exact=True).click()
@@ -79,7 +81,7 @@ with sync_playwright() as p:
     page.reload()
     expect(page.get_by_role('timer')).to_have_text(frozen)
     page.get_by_label('타이머 재개').click()
-    page.evaluate("()=>{const g=JSON.parse(localStorage.getItem('bluewings-player-game-v3'));g.deadline=Date.now()-1000;localStorage.setItem('bluewings-player-game-v3',JSON.stringify(g))}")
+    page.evaluate("()=>{const g=JSON.parse(localStorage.getItem('bluewings-player-game-v4'));g.deadline=Date.now()-1000;localStorage.setItem('bluewings-player-game-v4',JSON.stringify(g))}")
     page.reload()
     expect(page.locator('.football-answer')).to_contain_text('시간 종료')
     assert state()['rounds'][0]['earned']==0

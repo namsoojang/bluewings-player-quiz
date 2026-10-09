@@ -15,7 +15,7 @@ with sync_playwright() as p:
     page.reload();expect(page.get_by_role('timer')).to_have_text(frozen)
     assert page.locator('.elapsed-live b').inner_text()!=before
     for i in range(10):
-        g=page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v3'))")
+        g=page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v4'))")
         r=g['rounds'][i]
         page.locator('.choices button').nth(r['choices'].index(r['playerId'])).click()
         if i==9:
@@ -24,6 +24,7 @@ with sync_playwright() as p:
             expect(page.locator('.elapsed-live b')).to_have_text(duration)
         page.get_by_role('button',name='결과 보기' if i==9 else '다음 선수',exact=True).click()
     expect(page.locator('.completion-time b')).to_have_text(duration)
+    page.locator('details summary').click()
     expect(page.locator('.leaderboard')).to_contain_text('빠른 팀')
     saved=page.evaluate("JSON.parse(localStorage.getItem('bluewings-records-v1'))")
     assert len(saved)==1 and saved[0]['score']==1000
