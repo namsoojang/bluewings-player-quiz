@@ -20,9 +20,8 @@ with sync_playwright() as p:
     expect(page.locator('.roster-grid article')).to_have_count(1)
     expect(page.locator('.roster-grid')).to_contain_text('김주찬')
     page.get_by_role('button',name='시작 화면').click()
-    page.get_by_role('button',name='제한 없음',exact=True).click()
     page.get_by_role('button',name='선수 맞히기 시작').click()
-    def state(): return page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v2'))")
+    def state(): return page.evaluate("JSON.parse(localStorage.getItem('bluewings-player-game-v3'))")
     def pick(correct=True):
         g=state();r=g['rounds'][g['index']]
         chosen=r['playerId'] if correct else next(i for i in r['choices'] if i!=r['playerId'])
@@ -72,7 +71,6 @@ with sync_playwright() as p:
     page.screenshot(path='test-results/football-results.png',full_page=True)
     # Real pause/resume and expiration recovery.
     page.get_by_role('button',name='시작 화면으로').click()
-    page.get_by_role('button',name='30초',exact=True).click()
     page.get_by_role('button',name='선수 맞히기 시작').click()
     page.get_by_label('타이머 일시정지').click()
     frozen=page.get_by_role('timer').inner_text()
@@ -81,7 +79,7 @@ with sync_playwright() as p:
     page.reload()
     expect(page.get_by_role('timer')).to_have_text(frozen)
     page.get_by_label('타이머 재개').click()
-    page.evaluate("()=>{const g=JSON.parse(localStorage.getItem('bluewings-player-game-v2'));g.deadline=Date.now()-1000;localStorage.setItem('bluewings-player-game-v2',JSON.stringify(g))}")
+    page.evaluate("()=>{const g=JSON.parse(localStorage.getItem('bluewings-player-game-v3'));g.deadline=Date.now()-1000;localStorage.setItem('bluewings-player-game-v3',JSON.stringify(g))}")
     page.reload()
     expect(page.locator('.football-answer')).to_contain_text('시간 종료')
     assert state()['rounds'][0]['earned']==0
