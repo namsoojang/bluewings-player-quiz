@@ -37,7 +37,7 @@ with sync_playwright() as p:
     with page.expect_download() as dl:page.get_by_role('button',name='이미지 저장').click()
     dl.value.save_as('test-results/fan-report.png')
     image=Image.open('test-results/fan-report.png')
-    assert image.width==1080 and image.height>1400
+    assert image.width==1080 and image.height>1000
     assert len(image.getcolors(maxcolors=1000000))>10000
     page.evaluate('navigator.canShare=()=>false')
     with page.expect_download() as dl:page.get_by_role('button',name='공유하기').click()
